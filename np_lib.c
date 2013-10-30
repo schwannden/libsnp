@@ -2,8 +2,6 @@
 #include "np_lib.h"
 #include "error_functions.h"
 
-
-
 const char*
 Inet_ntop( int family, const void* sa, char* str, socklen_t socklen )
 {
@@ -518,5 +516,25 @@ Close(int fd)
 {
 	if (close(fd) == -1)
 		err_sys("close error");
+}
+
+typedef void sighandler_t( int);
+
+//Sigaction autamatically set the SA_RESTART flag
+int Sigaction( int sig, struct sigaction* ptrNewDisp, struct sigaction* ptrOldDisp )
+{
+  if( sig == SIGALRM ) {
+#ifdef SA_INTERRUPT
+	ptrNewDisp->sa_flags |= SA_INTERRUPT;
+#endif
+  } else {
+#ifdef SA_RESTART
+	ptrNewDisp->sa_flags |= SA_RESTART;
+#endif
+  }
+  if( (sigaction( sig, ptrNewDisp, ptrOldDisp ) < 0) )
+	err_sys( "sigaction error" );
+  
+  return 0;
 }
 

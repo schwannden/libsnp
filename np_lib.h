@@ -78,4 +78,7 @@ Fputs(const char *ptr, FILE *stream);
 
 void
 Close(int fd);
+
+int
+Sigaction( int flag, struct sigaction* newDisp, struct sigaction* oldDisp );
 #endif

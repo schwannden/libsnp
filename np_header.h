@@ -43,5 +43,9 @@ int accept(int socket, struct sockaddr *restrict address, socklen_t *restrict ad
 const char *inet_ntop(int af, const void *restrict src, char *restrict dst, socklen_t size);
 int inet_pton(int af, const char *restrict src, void *restrict dst);
 */
+#include<signal.h>
+/*signal.h
+for signal, sigaction
+*/
 
 #endif
