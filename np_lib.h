@@ -81,4 +81,14 @@ Close(int fd);
 
 int
 Sigaction( int flag, struct sigaction* newDisp, struct sigaction* oldDisp );
+
+int
+Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+
+void
+Shutdown(int fd, int how);
+
+ssize_t
+Read( int fd, void* buf, size_t n );
+
 #endif

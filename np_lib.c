@@ -394,44 +394,47 @@ Socketpair(int family, int type, int protocol, int *fd)
 
 
 //my_read reads 1 byte a time into *ptr
-//my_read return 1 if successful, 0 if there is nothing to be read, -1 if error
-static ssize_t buf_size;  //the number of bytes still in the buffer
-static ssize_t buf_front; //like the front of a queue, where the next data will come out
-static char buf[MAXLINE];      //the buffer, implemented as a queue
+//my_read return 1 if successful, 0 if eof or FIN is read, -1 if error other than EINTR
+static ssize_t readline_buff_size;  //the number of bytes still in the buffer
+static ssize_t readline_buff_front; //like the front of a queue, where the next data will come out
+static char readline_buff[MAXLINE];      //the buffer, implemented as a queue
+
+ssize_t
 my_read( int fd, char* ptr )
 {
-  if( buf_size <= 0 ){
+  if( readline_buff_size <= 0 ){
 again:
-	if( (buf_size = read( fd, buf, sizeof(buf))) < 0 )
+	if( (readline_buff_size = read( fd, readline_buff, sizeof(readline_buff))) < 0 )
 	  if( errno = EINTR )
 		goto again;
 	  else
 		return -1;
-	else if( buf_size == 0 )
+	else if( readline_buff_size == 0 )
 	  return 0;
 	else
-	  buf_front = 0;
+	  readline_buff_front = 0;
   }
-  *ptr = buf[ buf_front++ ];
-  buf_size--;
+  *ptr = readline_buff[ readline_buff_front++ ];
+  readline_buff_size--;
   return 1;
 }
 
 //readline returns the string length read (excluding '\0'), or -1 if error
+//readline reads a string until '\n' or eof, including '\n', then append the '\0' at the end.
 ssize_t
-readline( int fd, void* target_ptr, size_t maxlen )
+readline( int fd, void* void_ptr, size_t maxline )
 {
-  ssize_t strlen, read_status;
-  char* ptr = target_ptr;
-  for( strlen = 1 ; strlen < maxlen ; strlen++ )
+  ssize_t bytes_read, read_status;
+  char* ptr = void_ptr;
+  for( bytes_read = 1 ; bytes_read < maxline ; bytes_read++ )
     if( (read_status = my_read( fd, ptr )) == 1  ) {
 	  if( *ptr++ == '\n' ){
 		*ptr = '\0';
-		return strlen;
+		return bytes_read;
 	  }
     } else if( read_status == 0 ) {
 	  *ptr = '\0';
-	  return strlen-1;
+	  return bytes_read-1;
 	} else
 	  return -1;
 }
@@ -439,16 +442,16 @@ readline( int fd, void* target_ptr, size_t maxlen )
 ssize_t
 readlinebuf( void** ptrptr )
 {
-  if( buf_size > 0 )
-	*ptrptr = buf+buf_front;
-  return buf_size;
+  if( readline_buff_size > 0 )
+	*ptrptr = readline_buff+readline_buff_front;
+  return readline_buff_size;
 }
 
 ssize_t
-Readline( int fd, void* target_ptr, size_t maxlen )
+Readline( int fd, void* target_ptr, size_t maxline )
 {
   ssize_t n;
-  if( (n = readline( fd, target_ptr, maxlen )) < 0 )
+  if( (n = readline( fd, target_ptr, maxline )) < 0 )
 	err_sys( "readline error" );
   return n;
 }
@@ -538,3 +541,16 @@ int Sigaction( int sig, struct sigaction* ptrNewDisp, struct sigaction* ptrOldDi
   return 0;
 }
 
+ssize_t
+Read( int fd, void* buf, size_t n )
+{
+  int bytes_read;
+again:
+  if( (bytes_read = read(fd, buf, n)) < 0 )
+	if( errno == EINTR )
+	  goto again;
+	else
+	  err_sys( "read error" );
+
+  return bytes_read;
+}

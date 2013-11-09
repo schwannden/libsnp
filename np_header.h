@@ -1,5 +1,5 @@
-#ifndef __NP_HEADER 
-#define __NP_HEADER 
+#ifndef __NP_HEADER_H
+#define __NP_HEADER_H
 
 #include<stdio.h>
 #include<stdlib.h>
