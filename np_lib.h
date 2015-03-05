@@ -2,8 +2,25 @@
 #define __NP_LIB_H
 #include "np_header.h"
 
+#ifndef MAXSOCKADDRSIZE
 #define MAXSOCKADDRSIZE 128
+#endif
+
+#ifndef MAXLINE
 #define MAXLINE 1024
+#endif
+
+#ifndef SERV_PORT
+#define SERV_PORT 9987
+#endif
+
+#ifndef BUFF_SIZE
+#define BUFF_SIZE 1024
+#endif
+
+#ifndef LISTEN_Q
+#define LISTEN_Q 1024
+#endif
 
 typedef struct sockaddr SA;
 
