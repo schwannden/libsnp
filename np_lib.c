@@ -555,6 +555,15 @@ again:
   return bytes_read;
 }
 
+int
+Sctp_opt_info(int sockfd, sctp_assoc_t assoc_id, int opt, void* arg, socklen_t *size)
+{
+  if (sctp_opt_info (sockfd, assoc_id, opt, arg, size) == 0)
+    return 0;
+  else
+    err_sys( "scpt_opt_info error" );
+}
+
 sctp_assoc_t
 sctp_address_to_associd(int sock_fd, struct sockaddr *sa, socklen_t salen)
 {
@@ -583,11 +592,3 @@ sctp_get_no_strms(int sock_fd,struct sockaddr *to, socklen_t tolen)
   return (status.sstat_outstrms);
 }
 
-int
-Sctp_opt_info(int sockfd, sctp_assoc_t assoc_id, int opt, void* arg, socklen_t *size)
-{
-  if (sctp_opt_info (sockfd, assoc_id, opt, arg, size) == 0)
-    return 0;
-  else
-    err_sys( "scpt_opt_info error" );
-}

@@ -4,6 +4,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<stdarg.h>
 #include<unistd.h>
 /*unistd.h:
 ssize_t write(int fd, const void *buf, size_t count);

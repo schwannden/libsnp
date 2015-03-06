@@ -1,6 +1,7 @@
 #include<stdarg.h>		/* ANSI C header file */
 #include<syslog.h>		/* for syslog() */
 #include"np_header.h"
+#include"error_functions.h"
 #define MAXLINE 256
 int		daemon_proc;		/* set nonzero by daemon_init() */
 
