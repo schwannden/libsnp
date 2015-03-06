@@ -22,6 +22,10 @@
 #define LISTEN_Q 1024
 #endif
 
+#ifndef SCTP_MAXLINE
+#define SCTP_MAXLINE 800
+#endif
+
 typedef struct sockaddr SA;
 
 typedef enum BOOL {false=0, true=1} bool;
@@ -107,5 +111,14 @@ Shutdown(int fd, int how);
 
 ssize_t
 Read( int fd, void* buf, size_t n );
+
+int
+Scpt_opt_info(int sockfd, sctp_assoc_t assoc_id, int opt, void* arg, socklen_t *size);
+
+int 
+sctp_get_no_strms(int sock_fd,struct sockaddr *to, socklen_t tolen);
+
+sctp_assoc_t
+sctp_address_to_associd(int sock_fd, struct sockaddr *sa, socklen_t salen);
 
 #endif

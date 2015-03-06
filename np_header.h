@@ -47,5 +47,6 @@ int inet_pton(int af, const char *restrict src, void *restrict dst);
 /*signal.h
 for signal, sigaction
 */
+#include<netinet/sctp.h>
 
 #endif

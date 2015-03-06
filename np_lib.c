@@ -554,3 +554,40 @@ again:
 
   return bytes_read;
 }
+
+sctp_assoc_t
+sctp_address_to_associd(int sock_fd, struct sockaddr *sa, socklen_t salen)
+{
+  struct sctp_paddrparams sp;
+  int siz;
+
+  siz = sizeof(struct sctp_paddrparams);
+  bzero(&sp,siz);
+  memcpy(&sp.spp_address,sa,salen);
+  Sctp_opt_info(sock_fd,0,
+       SCTP_PEER_ADDR_PARAMS, &sp, &siz);
+  return(sp.spp_assoc_id);
+}
+
+int 
+sctp_get_no_strms(int sock_fd,struct sockaddr *to, socklen_t tolen)
+{
+  int retsz;
+  struct sctp_status status;
+  retsz = sizeof (status);  
+  bzero (&status, sizeof (status));
+
+  status.sstat_assoc_id = sctp_address_to_associd (sock_fd, to, tolen);
+  Sctp_opt_info (sock_fd, status.sstat_assoc_id, SCTP_STATUS, &status, &retsz);
+  
+  return (status.sstat_outstrms);
+}
+
+int
+Sctp_opt_info(int sockfd, sctp_assoc_t assoc_id, int opt, void* arg, socklen_t *size)
+{
+  if (sctp_opt_info (sockfd, assoc_id, opt, arg, size) == 0)
+    return 0;
+  else
+    err_sys( "scpt_opt_info error" );
+}
