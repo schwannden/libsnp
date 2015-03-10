@@ -10,6 +10,16 @@ static void	err_doit(int, int, const char *, va_list);
 /* Nonfatal error related to system call
  * Print message and return */
 void
+nonfatal_sys_ret(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(1, LOG_INFO, fmt, ap);
+	va_end(ap);
+	return;
+}
+void
 err_ret(const char *fmt, ...)
 {
 	va_list		ap;
@@ -23,6 +33,16 @@ err_ret(const char *fmt, ...)
 /* Fatal error related to system call
  * Print message and terminate */
 void
+fatal_sys_exit(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(1, LOG_ERR, fmt, ap);
+	va_end(ap);
+	exit(1);
+}
+void
 err_sys(const char *fmt, ...)
 {
 	va_list		ap;
@@ -35,6 +55,17 @@ err_sys(const char *fmt, ...)
 
 /* Fatal error related to system call
  * Print message, dump core, and terminate */
+void
+fatal_sys_dump(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(1, LOG_ERR, fmt, ap);
+	va_end(ap);
+	abort();		/* dump core and terminate */
+	exit(1);		/* shouldn't get here */
+}
 void
 err_dump(const char *fmt, ...)
 {
@@ -50,6 +81,16 @@ err_dump(const char *fmt, ...)
 /* Nonfatal error unrelated to system call
  * Print message and return */
 void
+nonfatal_user_ret(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(0, LOG_INFO, fmt, ap);
+	va_end(ap);
+	return;
+}
+void
 err_msg(const char *fmt, ...)
 {
 	va_list		ap;
@@ -62,6 +103,16 @@ err_msg(const char *fmt, ...)
 
 /* Fatal error unrelated to system call
  * Print message and terminate */
+void
+fatal_user_exit(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(0, LOG_ERR, fmt, ap);
+	va_end(ap);
+	exit(1);
+}
 void
 err_quit(const char *fmt, ...)
 {
