@@ -6,9 +6,9 @@ const char*
 Inet_ntop( int family, const void* sa, char* str, socklen_t socklen )
 {
   if( str == NULL )
-  err_sys( "3rd argument can not ne NULL" );
+  fatal_sys_exit( "3rd argument can not ne NULL" );
   if( (inet_ntop(family, sa, str, socklen) == NULL) )
-  err_sys( "inet_ntop error" );
+  fatal_sys_exit( "inet_ntop error" );
   return str;
 }
 
@@ -16,7 +16,7 @@ void
 Inet_pton(int family, const char *strptr, void *addrptr)
 {
   if ( inet_pton(family, strptr, addrptr) <= 0)
-    err_sys("inet_pton error for %s", strptr);  /* errno set */
+    fatal_sys_exit("inet_pton error for %s", strptr);  /* errno set */
 }
 
 //returns a representation string for sa. The string is staticalled allocated in sock_ntop with length MAXSOCKADDRSIZE.
@@ -72,7 +72,7 @@ Readn( int fd, void* buf, size_t n )
 {
   ssize_t number_read;
   if( (number_read = readn(fd, buf, n)) < 0 )
-  err_sys( "readn error" );
+  fatal_sys_exit( "readn error" );
   return number_read;
 }
 
@@ -102,7 +102,7 @@ void
 Writen( int fd, const void *ptr, size_t nbytes )
 {
   if (writen(fd, ptr, nbytes) != nbytes)
-    err_sys("writen error");
+    fatal_sys_exit("writen error");
 }
 
 int
@@ -119,7 +119,7 @@ again:
 #endif
       goto again;
     else
-      err_sys("accept error");
+      fatal_sys_exit("accept error");
   }
   return(n);
 }
@@ -128,35 +128,35 @@ void
 Bind(int fd, const struct sockaddr *sa, socklen_t salen)
 {
   if (bind(fd, sa, salen) < 0)
-    err_sys("bind error");
+    fatal_sys_exit("bind error");
 }
 
 void
 Connect(int fd, const struct sockaddr *sa, socklen_t salen)
 {
   if (connect(fd, sa, salen) < 0)
-    err_sys("connect error");
+    fatal_sys_exit("connect error");
 }
 
 void
 Getpeername(int fd, struct sockaddr *sa, socklen_t *salenptr)
 {
   if (getpeername(fd, sa, salenptr) < 0)
-    err_sys("getpeername error");
+    fatal_sys_exit("getpeername error");
 }
 
 void
 Getsockname(int fd, struct sockaddr *sa, socklen_t *salenptr)
 {
   if (getsockname(fd, sa, salenptr) < 0)
-    err_sys("getsockname error");
+    fatal_sys_exit("getsockname error");
 }
 
 void
 Getsockopt(int fd, int level, int optname, void *optval, socklen_t *optlenptr)
 {
   if (getsockopt(fd, level, optname, optval, optlenptr) < 0)
-    err_sys("getsockopt error");
+    fatal_sys_exit("getsockopt error");
 }
 
 #ifdef  HAVE_INET6_RTH_INIT
@@ -230,7 +230,7 @@ Kqueue(void)
   int ret;
 
   if ((ret = kqueue()) < 0)
-    err_sys("kqueue error");
+    fatal_sys_exit("kqueue error");
   return ret;
 }
 
@@ -242,7 +242,7 @@ Kevent(int kq, const struct kevent *changelist, int nchanges,
 
   if ((ret = kevent(kq, changelist, nchanges,
             eventlist, nevents, timeout)) < 0)
-    err_sys("kevent error");
+    fatal_sys_exit("kevent error");
   return ret;
 }
 #endif
@@ -259,7 +259,7 @@ Listen(int fd, int backlog)
     backlog = atoi(ptr);
 
   if (listen(fd, backlog) < 0)
-    err_sys("listen error");
+    fatal_sys_exit("listen error");
 }
 /* end Listen */
 
@@ -270,7 +270,7 @@ Poll(struct pollfd *fdarray, unsigned long nfds, int timeout)
   int    n;
 
   if ( (n = poll(fdarray, nfds, timeout)) < 0)
-    err_sys("poll error");
+    fatal_sys_exit("poll error");
 
   return(n);
 }
@@ -282,7 +282,7 @@ Recv(int fd, void *ptr, size_t nbytes, int flags)
   ssize_t    n;
 
   if ( (n = recv(fd, ptr, nbytes, flags)) < 0)
-    err_sys("recv error");
+    fatal_sys_exit("recv error");
   return(n);
 }
 
@@ -293,7 +293,7 @@ Recvfrom(int fd, void *ptr, size_t nbytes, int flags,
   ssize_t    n;
 
   if ( (n = recvfrom(fd, ptr, nbytes, flags, sa, salenptr)) < 0)
-    err_sys("recvfrom error");
+    fatal_sys_exit("recvfrom error");
   return(n);
 }
 
@@ -303,7 +303,7 @@ Recvmsg(int fd, struct msghdr *msg, int flags)
   ssize_t    n;
 
   if ( (n = recvmsg(fd, msg, flags)) < 0)
-    err_sys("recvmsg error");
+    fatal_sys_exit("recvmsg error");
   return(n);
 }
 
@@ -314,7 +314,7 @@ Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
   int    n;
 
   if ( (n = select(nfds, readfds, writefds, exceptfds, timeout)) < 0)
-    err_sys("select error");
+    fatal_sys_exit("select error");
   return(n);    /* can return 0 on timeout */
 }
 
@@ -322,7 +322,7 @@ void
 Send(int fd, const void *ptr, size_t nbytes, int flags)
 {
   if (send(fd, ptr, nbytes, flags) != (ssize_t)nbytes)
-    err_sys("send error");
+    fatal_sys_exit("send error");
 }
 
 void
@@ -330,7 +330,7 @@ Sendto(int fd, const void *ptr, size_t nbytes, int flags,
      const struct sockaddr *sa, socklen_t salen)
 {
   if (sendto(fd, ptr, nbytes, flags, sa, salen) != (ssize_t)nbytes)
-    err_sys("sendto error");
+    fatal_sys_exit("sendto error");
 }
 
 void
@@ -344,21 +344,21 @@ Sendmsg(int fd, const struct msghdr *msg, int flags)
     nbytes += msg->msg_iov[i].iov_len;
 
   if (sendmsg(fd, msg, flags) != nbytes)
-    err_sys("sendmsg error");
+    fatal_sys_exit("sendmsg error");
 }
 
 void
 Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen)
 {
   if (setsockopt(fd, level, optname, optval, optlen) < 0)
-    err_sys("setsockopt error");
+    fatal_sys_exit("setsockopt error");
 }
 
 void
 Shutdown(int fd, int how)
 {
   if (shutdown(fd, how) < 0)
-    err_sys("shutdown error");
+    fatal_sys_exit("shutdown error");
 }
 
 int
@@ -367,7 +367,7 @@ Sockatmark(int fd)
   int    n;
 
   if ( (n = sockatmark(fd)) < 0)
-    err_sys("sockatmark error");
+    fatal_sys_exit("sockatmark error");
   return(n);
 }
 
@@ -378,7 +378,7 @@ Socket(int family, int type, int protocol)
   int    n;
 
   if ( (n = socket(family, type, protocol)) < 0)
-    err_sys("socket error");
+    fatal_sys_exit("socket error");
   return(n);
 }
 /* end Socket */
@@ -389,7 +389,7 @@ Socketpair(int family, int type, int protocol, int *fd)
   int    n;
 
   if ( (n = socketpair(family, type, protocol, fd)) < 0)
-    err_sys("socketpair error");
+    fatal_sys_exit("socketpair error");
 }
 
 
@@ -452,7 +452,7 @@ Readline( int fd, void* target_ptr, size_t maxline )
 {
   ssize_t n;
   if( (n = readline( fd, target_ptr, maxline )) < 0 )
-  err_sys( "readline error" );
+  fatal_sys_exit( "readline error" );
   return n;
 }
 
@@ -463,7 +463,7 @@ Fork(void)
   pid_t  pid;
 
   if ( (pid = fork()) == -1)
-    err_sys("fork error");
+    fatal_sys_exit("fork error");
   return(pid);
 }
 
@@ -471,7 +471,7 @@ void
 Fclose(FILE *fp)
 {
   if (fclose(fp) != 0)
-    err_sys("fclose error");
+    fatal_sys_exit("fclose error");
 }
 
 FILE *
@@ -480,7 +480,7 @@ Fdopen(int fd, const char *type)
   FILE  *fp;
 
   if ( (fp = fdopen(fd, type)) == NULL)
-    err_sys("fdopen error");
+    fatal_sys_exit("fdopen error");
 
   return(fp);
 }
@@ -491,7 +491,7 @@ Fgets(char *ptr, int n, FILE *stream)
   char  *rptr;
 
   if ( (rptr = fgets(ptr, n, stream)) == NULL && ferror(stream))
-    err_sys("fgets error");
+    fatal_sys_exit("fgets error");
 
   return (rptr);
 }
@@ -502,7 +502,7 @@ Fopen(const char *filename, const char *mode)
   FILE  *fp;
 
   if ( (fp = fopen(filename, mode)) == NULL)
-    err_sys("fopen error");
+    fatal_sys_exit("fopen error");
 
   return(fp);
 }
@@ -511,14 +511,14 @@ void
 Fputs(const char *ptr, FILE *stream)
 {
   if (fputs(ptr, stream) == EOF)
-    err_sys("fputs error");
+    fatal_sys_exit("fputs error");
 }
 
 void
 Close(int fd)
 {
   if (close(fd) == -1)
-    err_sys("close error");
+    fatal_sys_exit("close error");
 }
 
 typedef void sighandler_t( int);
@@ -536,7 +536,7 @@ int Sigaction( int sig, struct sigaction* ptrNewDisp, struct sigaction* ptrOldDi
 #endif
   }
   if( (sigaction( sig, ptrNewDisp, ptrOldDisp ) < 0) )
-  err_sys( "sigaction error" );
+  fatal_sys_exit( "sigaction error" );
   
   return 0;
 }
@@ -550,7 +550,7 @@ again:
   if( errno == EINTR )
     goto again;
   else
-    err_sys( "read error" );
+    fatal_sys_exit( "read error" );
 
   return bytes_read;
 }
@@ -561,7 +561,7 @@ Sctp_opt_info(int sockfd, sctp_assoc_t assoc_id, int opt, void* arg, socklen_t *
   if (sctp_opt_info (sockfd, assoc_id, opt, arg, size) == 0)
     return 0;
   else
-    err_sys( "scpt_opt_info error" );
+    fatal_sys_exit( "scpt_opt_info error" );
 }
 
 sctp_assoc_t
@@ -592,3 +592,29 @@ sctp_get_no_strms(int sock_fd,struct sockaddr *to, socklen_t tolen)
   return (status.sstat_outstrms);
 }
 
+int
+Sctp_sendmsg (int sock_fd, void* data, size_t len, SA* to, 
+              socklen_t tolen, uint32_t ppid, uint32_t flags, 
+              uint16_t stream_no, uint32_t timetolive, uint32_t context)
+{
+  int ret;
+  ret = sctp_sendmsg (sock_fd, data, len, to, tolen, ppid, flags, 
+                      stream_no, timetolive, context);
+  printf ("sctp returned %d\n", ret);
+  if (ret < 0)
+    fatal_sys_exit ("sctp_sendmsg error");
+  return ret;
+}
+
+int
+Sctp_recvmsg (int sock_fd, void *msg, size_t len, SA* from,
+              socklen_t *fromlen, struct sctp_sndrcvinfo *sinfo,
+              int *msg_flags)
+{
+  int ret;
+  ret = sctp_recvmsg (sock_fd, msg, len, from, fromlen, sinfo, msg_flags);
+  if (ret < 0){
+    fatal_sys_exit ("sctp_recvmsg error");
+  }
+  return(ret);
+}

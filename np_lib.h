@@ -26,6 +26,14 @@
 #define SCTP_MAXLINE 800
 #endif
 
+#ifndef SCTP_NEED_MORE_THRESHOLD
+#define  1024
+#endif
+
+#ifndef SCTP_NEED_MORE_THRESHOLD
+#define 65535
+#endif
+
 typedef struct sockaddr SA;
 
 typedef enum BOOL {false=0, true=1} bool;
@@ -120,5 +128,10 @@ sctp_get_no_strms(int sock_fd,struct sockaddr *to, socklen_t tolen);
 
 sctp_assoc_t
 sctp_address_to_associd(int sock_fd, struct sockaddr *sa, socklen_t salen);
+
+int
+Sctp_sendmsg (int sock_fd, void* data, size_t len, SA* to, 
+              socklen_t tolen, uint32_t ppid, uint32_t flags, 
+              uint16_t stream_no, uint32_t timetolive, uint32_t context);
 
 #endif
