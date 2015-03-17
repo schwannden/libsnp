@@ -467,6 +467,15 @@ Fork(void)
   return(pid);
 }
 
+void*
+Malloc(size_t size)
+{
+  void* buf = malloc (size);
+  if (buf == NULL)
+    fatal_sys_exit ("malloc error");
+  return buf;
+}
+
 void
 Fclose(FILE *fp)
 {
@@ -600,7 +609,6 @@ Sctp_sendmsg (int sock_fd, void* data, size_t len, SA* to,
   int ret;
   ret = sctp_sendmsg (sock_fd, data, len, to, tolen, ppid, flags, 
                       stream_no, timetolive, context);
-  printf ("sctp returned %d\n", ret);
   if (ret < 0)
     fatal_sys_exit ("sctp_sendmsg error");
   return ret;
@@ -618,3 +626,42 @@ Sctp_recvmsg (int sock_fd, void *msg, size_t len, SA* from,
   }
   return(ret);
 }
+
+static uint8_t* sctp_pdapi_readbuf = NULL;
+static int sctp_pdapi_readbuf_size = 0;
+
+uint8_t *
+pdapi_recvmsg (int sock_fd, int* readlen, SA* from, int* fromlen, 
+               struct sctp_sndrcvinfo* sri, int* msg_flags)
+{
+  int bytes_read, bytes_left;
+
+  if (sctp_pdapi_readbuf == NULL)
+    {
+      sctp_pdapi_readbuf = (uint8_t*) Malloc (SCTP_PDAPI_INCR_SIZE);
+      sctp_pdapi_readbuf_size = SCTP_PDAPI_INCR_SIZE;
+    }
+
+  bytes_read = Sctp_recvmsg (sock_fd, sctp_pdapi_readbuf, sctp_pdapi_readbuf_size, 
+                             from, fromlen, sri, msg_flags);
+  while ((*msg_flags & MSG_EOR) == 0)
+    {
+      bytes_left = sctp_pdapi_readbuf_size - bytes_read;
+      if (bytes_left < SCTP_NEED_MORE_THRESHOLD)
+        {
+          sctp_pdapi_readbuf = 
+            realloc (sctp_pdapi_readbuf, sctp_pdapi_readbuf_size + SCTP_PDAPI_INCR_SIZE);
+          if (sctp_pdapi_readbuf == NULL)
+            fatal_sys_exit ("realloc error, sctp partial delivery api ran out of memory");
+          sctp_pdapi_readbuf_size += SCTP_PDAPI_INCR_SIZE;
+          bytes_left = sctp_pdapi_readbuf_size - bytes_read;
+        }
+      bytes_read += Sctp_recvmsg (sock_fd, &sctp_pdapi_readbuf[bytes_read], 
+                                  sctp_pdapi_readbuf_size, from, fromlen, 
+                                  sri, msg_flags);
+    }
+  *readlen = bytes_read;
+  return sctp_pdapi_readbuf;
+}
+
+

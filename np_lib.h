@@ -23,15 +23,19 @@
 #endif
 
 #ifndef SCTP_MAXLINE
-#define SCTP_MAXLINE 800
+#define SCTP_MAXLINE 1024
+#endif
+
+#ifndef SCTP_MAXBLOCK
+#define SCTP_MAXBLOCK 655360
 #endif
 
 #ifndef SCTP_NEED_MORE_THRESHOLD
-#define  1024
+#define SCTP_NEED_MORE_THRESHOLD 1024
 #endif
 
-#ifndef SCTP_NEED_MORE_THRESHOLD
-#define 65535
+#ifndef SCTP_PDAPI_INCR_SIZE
+#define SCTP_PDAPI_INCR_SIZE 65535
 #endif
 
 typedef struct sockaddr SA;
@@ -90,6 +94,9 @@ Readline( int fd, void* target_ptr, size_t maxlen );
 pid_t
 Fork(void);
 
+void*
+Malloc(size_t size);
+
 void
 Fclose(FILE *fp);
 
@@ -133,5 +140,9 @@ int
 Sctp_sendmsg (int sock_fd, void* data, size_t len, SA* to, 
               socklen_t tolen, uint32_t ppid, uint32_t flags, 
               uint16_t stream_no, uint32_t timetolive, uint32_t context);
+
+uint8_t *
+pdapi_recvmsg (int sock_fd, int* readlen, SA* from, int* fromlen, 
+               struct sctp_sndrcvinfo* sri, int* msgflags);
 
 #endif
