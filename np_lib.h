@@ -145,5 +145,5 @@ uint8_t *
 pdapi_recvmsg (int sock_fd, int* readlen, SA* from, int* fromlen, 
                struct sctp_sndrcvinfo* sri, int* msgflags);
 
-void print_notification (char* notify_buf)
+void print_notification (char* notify_buf);
 #endif
