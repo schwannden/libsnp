@@ -1,12 +1,28 @@
-CFLAGS=-g
+ifeq ($(PREFIX),)
+PREFIX = /usr
+endif
 
-all:  np_lib.o error_function.o
+CFLAGS=-g -fpic
 
-error_function.o: error_functions.c
-	gcc ${CFLAGS} -c error_functions.c
+SRCS = $(wildcard *.c)
+ifeq ($(SRCS),)                  #work around wildcard function bug in GNU Make 3.77
+SRCS = $(shell echo *.c)
+endif
 
-np_lib.o: np_lib.c
-	gcc ${CFLAGS} -c np_lib.c
+OBJS = $(SRCS:.c=.o)
+
+all: libsnp.so
+
+libsnp.so: $(OBJS)
+	$(CC) $(CFLAGS) -shared -o $@ $(OBJS)
+
+install:
+	mkdir -p $(PREFIX)/include/libsnp $(PREFIX)/lib
+	cp *.h   $(PREFIX)/include/libsnp
+	cp *.so  $(PREFIX)/lib
+
+uninstall: clean
+	rm -rf $(PREFIX)/include/libsnp $(PREFIX)/lib/libsnp.so
 
 clean:
-	rm *.o
+	rm *.o *.so
