@@ -1,5 +1,13 @@
 # libsnp: schwannden's network programming library
 
+### Pre-requisites
+
+* Fedora
+``sudo yum install lksctp*``
+
+* Debian/Ubuntu
+``sudo apt-get install libsctp-dev lksctp-tools``
+
 ### To compile
 
 ``make``
