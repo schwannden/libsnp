@@ -1,27 +1,30 @@
-# libsnp, schwannden's network programming library
+# libsnp: schwannden's network programming library
 
 ### To compile
-```make```
+
+``make``
 
 ### To install
-```sudo make install```
 
-The default ```prefix``` is ```/usr```
+``sudo make install``
 
-The headers are installed in $(PREFIX)/includes/libsnp
+The default ``prefix`` is ``/usr``
 
-The library is installed in $(PREFIX)/lib
+The headers are installed in ``$(PREFIX)/includes/libsnp``
 
-Customize your ```PREFIX``` by
+The library is installed in ``$(PREFIX)/lib``
 
-```sudo make install PREFIX=/yourpath```
+Customize your ``PREFIX`` by
+
+``sudo make install PREFIX=/yourpath``
 
 ### To uninstall
-```sudo make uninstall```
 
-Default uninstall ```PREFIX``` is ```/usr```
+``sudo make uninstall``
 
-If you installed the library in different PREFIX, remember to add correct prefix by
+Default uninstall ``PREFIX`` is ``/usr``
 
-```sudo make uninstall PREFIX=/yourpath```
+If you installed the library in different ``PREFIX``, remember to add correct prefix by
+
+``sudo make uninstall PREFIX=/yourpath``
 
