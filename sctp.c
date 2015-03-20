@@ -103,7 +103,7 @@ pdapi_recvmsg (int sock_fd, int* readlen, SA* from, int* fromlen,
 }
 
 static char ip_addr_presentation[INET_ADDRSTRLEN];
-void print_notification (char* notify_buf)
+void print_notification (int sock_fd, char* notify_buf)
 {
   union sctp_notification* notification;
   struct sctp_assoc_change*     sac;
@@ -114,6 +114,8 @@ void print_notification (char* notify_buf)
   struct sctp_adaptation_event* sae;
   struct sctp_pdapi_event*      pdapi;
   const char* str; 
+  struct sockaddr_storage *address_list;
+  int address_number = 0;
 
   notification = (union sctp_notification*) notify_buf;
   switch (notification->sn_header.sn_type)
@@ -124,12 +126,14 @@ void print_notification (char* notify_buf)
           {
             case SCTP_COMM_UP:
               str = "COMMUNICATION UP";
+              address_number = 1;
               break;
             case SCTP_COMM_LOST:
               str = "COMMUNICATION LOST";
               break;
             case SCTP_RESTART:
               str = "RESTART";
+              address_number = 1;
               break;
             case SCTP_SHUTDOWN_COMP:
               str = "SHUTDOWN COMPLETE";
@@ -143,6 +147,17 @@ void print_notification (char* notify_buf)
           }
         printf ("#  SCTP notification: SCTP_ASSOC_CHANGE: %s, assoc=0x%x\n",
                  str, (uint32_t) sac->sac_assoc_id);
+        if (address_number == 1) //only print address on SCTP_COMM_UP and SCTP_RESTART
+          {
+            address_number = sctp_getpaddrs (sock_fd, sac->sac_assoc_id, (SA**)&address_list);
+            printf ("There are %d remote address:\n", address_number);
+            sctp_list_addresses (address_list, address_number);
+            sctp_freepaddrs ((SA*) address_list);
+            address_number = sctp_getladdrs (sock_fd, sac->sac_assoc_id, (SA**)&address_list);
+            printf ("There are %d local address:\n", address_number);
+            sctp_list_addresses (address_list, address_number);
+            sctp_freeladdrs ((SA*) address_list);
+          }
         break;
       case SCTP_PEER_ADDR_CHANGE:
         spc = &notification->sn_paddr_change;
@@ -167,9 +182,9 @@ void print_notification (char* notify_buf)
               str = "UNKNOWN";
               break;
           }
-        Inet_ntop (AF_INET, (SA*) &spc->spc_aaddr, ip_addr_presentation, sizeof (spc->spc_aaddr)); 
         printf ("#  SCTP notification: SCTP_PEER_ADDR_CHANGE: %s, addr=%s, assoc=0x%x\n",
-                 str, ip_addr_presentation, (uint32_t) spc->spc_assoc_id);
+                 str, Sock_ntop ( (SA*) &spc->spc_aaddr, sizeof (spc->spc_aaddr) ),
+                 (uint32_t) spc->spc_assoc_id);
         break;
       case SCTP_REMOTE_ERROR:
         sre = &notification->sn_remote_error;
@@ -202,3 +217,111 @@ void print_notification (char* notify_buf)
     }
 }
 
+void
+sctp_list_addresses (struct sockaddr_storage* addrs, int n)
+{
+  if (n<1)
+    fatal_user_exit ("error sctp_list_addresses: cannot list %n addresses", n);
+
+  struct sockaddr_storage* current;
+  int                      i, socklen;
+
+  current = addrs;
+  for (i = 0 ; i < n ; i++)
+    {
+      printf ("    %d. %s\n", i+1, Sock_ntop ((SA*)current, socklen));
+#ifdef HAVE_SOCKADDR_SA_LEN
+      socklen = current->ss_len;
+#else
+      switch (current->ss_family)
+        {
+          case AF_INET: socklen = sizeof (struct sockaddr_in); break;
+#ifdef IPV6
+          case AF_INET6: socklen = sizeof (struct sockaddr_in6); break;
+#endif
+          default: fatal_user_exit ("sctp_list_addresses unknown AF");
+        }
+#endif
+      current = (struct sockaddr_storage*) ((char*) current + socklen);
+    }
+}
+
+char *
+sock_ntop(const struct sockaddr *sa, socklen_t salen)
+{
+    char  portstr[8];
+    static char str[128];    /* Unix domain is largest */
+
+  switch (sa->sa_family) {
+  case AF_INET: {
+    struct sockaddr_in  *sin = (struct sockaddr_in *) sa;
+
+    if (inet_ntop(AF_INET, &sin->sin_addr, str, sizeof(str)) == NULL)
+      return(NULL);
+    if (ntohs(sin->sin_port) != 0) {
+      snprintf(portstr, sizeof(portstr), ":%d", ntohs(sin->sin_port));
+      strcat(str, portstr);
+    }
+    return(str);
+  }
+/* end sock_ntop */
+
+#ifdef  IPV6
+  case AF_INET6: {
+    struct sockaddr_in6  *sin6 = (struct sockaddr_in6 *) sa;
+
+    str[0] = '[';
+    if (inet_ntop(AF_INET6, &sin6->sin6_addr, str + 1, sizeof(str) - 1) == NULL)
+      return(NULL);
+    if (ntohs(sin6->sin6_port) != 0) {
+      snprintf(portstr, sizeof(portstr), "]:%d", ntohs(sin6->sin6_port));
+      strcat(str, portstr);
+      return(str);
+    }
+    return (str + 1);
+  }
+#endif
+
+#ifdef  AF_UNIX
+  case AF_UNIX: {
+    struct sockaddr_un  *unp = (struct sockaddr_un *) sa;
+
+      /* OK to have no pathname bound to the socket: happens on
+         every connect() unless client calls bind() first. */
+    if (unp->sun_path[0] == 0)
+      strcpy(str, "(no pathname bound)");
+    else
+      snprintf(str, sizeof(str), "%s", unp->sun_path);
+    return(str);
+  }
+#endif
+
+#ifdef  HAVE_SOCKADDR_DL_STRUCT
+  case AF_LINK: {
+    struct sockaddr_dl  *sdl = (struct sockaddr_dl *) sa;
+
+    if (sdl->sdl_nlen > 0)
+      snprintf(str, sizeof(str), "%*s (index %d)",
+           sdl->sdl_nlen, &sdl->sdl_data[0], sdl->sdl_index);
+    else
+      snprintf(str, sizeof(str), "AF_LINK, index=%d", sdl->sdl_index);
+    return(str);
+  }
+#endif
+  default:
+    snprintf(str, sizeof(str), "sock_ntop: unknown AF_xxx: %d, len %d",
+         sa->sa_family, salen);
+    return(str);
+  }
+    return (NULL);
+}
+
+char *
+Sock_ntop(const struct sockaddr *sa, socklen_t salen)
+{
+  char  *ptr;
+
+  if ( (ptr = sock_ntop(sa, salen)) == NULL)
+    err_sys("sock_ntop error");  /* inet_ntop() sets errno */
+  return(ptr);
+}

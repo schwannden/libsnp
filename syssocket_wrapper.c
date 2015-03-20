@@ -19,31 +19,6 @@ Inet_pton(int family, const char *strptr, void *addrptr)
     fatal_sys_exit("inet_pton error for %s", strptr);  /* errno set */
 }
 
-//returns a representation string for sa. The string is staticalled allocated in sock_ntop with length MAXSOCKADDRSIZE.
-char*
-sock_ntop( const SA* sa_ptr, socklen_t socklen )
-{
-  in_port_t port;
-  static char str[ MAXSOCKADDRSIZE ];
-  switch( sa_ptr->sa_family ){
-  case AF_INET:{
-      struct sockaddr_in* sin_ptr = (struct sockaddr_in*)sa_ptr;
-    Inet_ntop( AF_INET, &sin_ptr->sin_addr, str, MAXSOCKADDRSIZE );
-    if( (port = ntohs( sin_ptr->sin_port)) > 0 )
-      snprintf( str+strlen(str), MAXSOCKADDRSIZE-INET_ADDRSTRLEN, ":%d", port );
-    return str;
-  }
-  case AF_INET6:{
-    str[0] = '[';
-      struct sockaddr_in6* sin6_ptr = (struct sockaddr_in6*)sa_ptr;
-    Inet_ntop( AF_INET6, &sin6_ptr->sin6_addr, str+1, MAXSOCKADDRSIZE );
-    if( (port = ntohs( sin6_ptr->sin6_port)) > 0 )
-      snprintf( str+strlen(str), MAXSOCKADDRSIZE-INET_ADDRSTRLEN-1, "]:%d", port );
-    return str;
-  }
-  }
-}
-
 int
 Accept(int fd, struct sockaddr *sa, socklen_t *salenptr)
 {

@@ -48,10 +48,6 @@ Inet_ntop( int family, const void* sa, char* str, socklen_t socklen );
 void
 Inet_pton(int family, const char *strptr, void *addrptr);
 
-//returns a representation string for sa. The string is staticalled allocated in sock_ntop with length MAXSOCKADDRSIZE.
-char*
-sock_ntop( const SA* sa, socklen_t socklen );
-
 ssize_t
 readn( int fd, void* buf, size_t n );
 
@@ -145,5 +141,16 @@ uint8_t *
 pdapi_recvmsg (int sock_fd, int* readlen, SA* from, int* fromlen, 
                struct sctp_sndrcvinfo* sri, int* msgflags);
 
-void print_notification (char* notify_buf);
+void print_notification (int sock_fd, char* notify_buf);
+
+//returns a representation string for sa. The string is staticalled 
+//allocated in sock_ntop with length MAXSOCKADDRSIZE.
+char *
+sock_ntop(const struct sockaddr *sa, socklen_t salen);
+
+char *
+Sock_ntop(const struct sockaddr *sa, socklen_t salen);
+
+void
+sctp_list_addresses (struct sockaddr_storage* addrs, int n);
 #endif

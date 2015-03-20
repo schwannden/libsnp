@@ -38,6 +38,11 @@ int socket(int domain, int type, int protocol);
 int listen(int socket, int backlog);
 int accept(int socket, struct sockaddr *restrict address, socklen_t *restrict address_len);
 */
+#include<sys/un.h>
+/* sys/un.h
+for unix socket related function and structure, ex
+(struct sockaddr_un)->sun_path
+*/
 #include<sys/types.h>
 #include<arpa/inet.h>
 /*arpa/inet.h
