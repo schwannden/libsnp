@@ -141,7 +141,7 @@ void print_notification (char* notify_buf)
               str = "UNKNOWN";
               break;
           }
-        printf ("SCTP_ASSOC_CHANGE: %s, assoc=0x%x\n",
+        printf ("#  SCTP notification: SCTP_ASSOC_CHANGE: %s, assoc=0x%x\n",
                  str, (uint32_t) sac->sac_assoc_id);
         break;
       case SCTP_PEER_ADDR_CHANGE:
@@ -168,37 +168,37 @@ void print_notification (char* notify_buf)
               break;
           }
         Inet_ntop (AF_INET, (SA*) &spc->spc_aaddr, ip_addr_presentation, sizeof (spc->spc_aaddr)); 
-        printf ("SCTP_PEER_ADDR_CHANGE: %s, addr=%s, assoc=0x%x\n",
+        printf ("#  SCTP notification: SCTP_PEER_ADDR_CHANGE: %s, addr=%s, assoc=0x%x\n",
                  str, ip_addr_presentation, (uint32_t) spc->spc_assoc_id);
         break;
       case SCTP_REMOTE_ERROR:
         sre = &notification->sn_remote_error;
-        printf ("SCTP_REMOTE_ERROR: asoc=0x%x, error=%d\n",
+        printf ("#  SCTP notification: SCTP_REMOTE_ERROR: asoc=0x%x, error=%d\n",
                  (uint32_t) sre->sre_assoc_id, sre->sre_error);
         break;
       case SCTP_SEND_FAILED:
         ssf = &notification->sn_send_failed;
-        printf ("SCTP_SEND_FAILED: asoc=0x%x, error=%d\n",
+        printf ("#  SCTP notification: SCTP_SEND_FAILED: asoc=0x%x, error=%d\n",
                  (uint32_t) ssf->ssf_assoc_id, ssf->ssf_error);
         break;
       case SCTP_ADAPTATION_INDICATION:
         sae = &notification->sn_adaptation_event;
-        printf ("SCTP_ADAPTATION_INDICATION: 0x%x\n", (u_int) sae->sai_adaptation_ind);
+        printf ("#  SCTP notification: SCTP_ADAPTATION_INDICATION: 0x%x\n", (u_int) sae->sai_adaptation_ind);
         break;
       case SCTP_PARTIAL_DELIVERY_EVENT:
         pdapi = &notification->sn_pdapi_event;
         if (pdapi->pdapi_indication == SCTP_PARTIAL_DELIVERY_ABORTED)
-          printf ("SCTP_PARTIAL_DELIVERY_ABORTED\n");
+          printf ("#  SCTP notification: SCTP_PARTIAL_DELIVERY_ABORTED\n");
         else
-          printf ("Unknown SCTP_PARTIAL_DELIVERY_EVENT 0x%x\n",
+          printf ("#  SCTP notification: SUnknown SCTP_PARTIAL_DELIVERY_EVENT 0x%x\n",
                   pdapi->pdapi_indication);
         break;
       case SCTP_SHUTDOWN_EVENT:
         sse = &notification->sn_shutdown_event;
-        printf ("SCTP_SHUTDOWN_EVENT: assoc_id=0x%x\n", (uint32_t)sse->sse_assoc_id);
+        printf ("#  SCTP notification: SCTP_SHUTDOWN_EVENT: assoc_id=0x%x\n", (uint32_t)sse->sse_assoc_id);
         break;
       default:
-        nonfatal_user_ret ("unknown notification type 0x%x\n", notification->sn_header.sn_type);
+        nonfatal_user_ret ("#  SCTP notification: unknown notification type 0x%x\n", notification->sn_header.sn_type);
     }
 }
 
