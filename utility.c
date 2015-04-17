@@ -100,15 +100,15 @@ readline( int fd, void* void_ptr, size_t maxline )
   char* ptr = void_ptr;
   for( bytes_read = 1 ; bytes_read < maxline ; bytes_read++ )
     if( (read_status = my_read( fd, ptr )) == 1  ) {
-    if( *ptr++ == '\n' ){
-    *ptr = '\0';
-    return bytes_read;
-    }
+      if( *ptr++ == '\n' ){
+      *ptr = '\0';
+      return bytes_read;
+      }
     } else if( read_status == 0 ) {
-    *ptr = '\0';
-    return bytes_read-1;
-  } else
-    return -1;
+      *ptr = '\0';
+      return bytes_read-1;
+    } else
+      return -1;
 }
 //readlinebuf set *ptrptr to the location of the unread byte in the buffer and return buffer size
 ssize_t

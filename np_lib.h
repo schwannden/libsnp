@@ -2,6 +2,9 @@
 #define __NP_LIB_H
 #include "np_header.h"
 
+#define max(x, y) ((x>y)? (x) : (y))
+#define min(x, y) ((x>y)? (y) : (x))
+
 #ifndef MAXSOCKADDRSIZE
 #define MAXSOCKADDRSIZE 128
 #endif
