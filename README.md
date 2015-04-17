@@ -1,12 +1,17 @@
 # libsnp: schwannden's network programming library
 
 ### Pre-requisites
-
-* Fedora
-``sudo yum install lksctp*``
-
-* Debian/Ubuntu
-``sudo apt-get install libsctp-dev lksctp-tools``
+We need ``lksctp-tools``
+```
+git clone git://github.com/borkmann/lksctp-tools.git
+cd lksctp-tools
+git checkout lksctp-tools-1.0.16
+./bootstrap
+./configure
+make
+make install
+```
+By default this installs the sctp libraries in ``/usr/local/lib/libsctp.so``
 
 ### To compile
 
