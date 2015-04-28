@@ -161,7 +161,7 @@ void print_notification (int sock_fd, char* notify_buf)
         break;
       case SCTP_PEER_ADDR_CHANGE:
         spc = &notification->sn_paddr_change;
-        switch (spc->spc_state)
+        switch ( spc->spc_state)
           {
             case SCTP_ADDR_AVAILABLE:
               str = "ADDRESS AVAILABLE";
@@ -177,6 +177,9 @@ void print_notification (int sock_fd, char* notify_buf)
               break;
             case SCTP_ADDR_MADE_PRIM:
               str = "ADDRESS MADE PRIMARY";
+              break;
+            case SCTP_ADDR_CONFIRMED:
+              str = "ADDRESS CONFIRMED";
               break;
             default:
               str = "UNKNOWN";
@@ -244,6 +247,16 @@ sctp_list_addresses (struct sockaddr_storage* addrs, int n)
 #endif
       current = (struct sockaddr_storage*) ((char*) current + socklen);
     }
+}
+
+int heartbeat_action (int sock_fd, struct sockaddr* sa, socklen_t salen, int interval)
+{
+  struct sctp_paddrparams paddrparams;
+  int    size = sizeof(paddrparams);
+  bzero (&paddrparams, size);
+  memcpy ((void*) &paddrparams.spp_address, sa, salen);
+  Setsockopt (sock_fd, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS, &paddrparams, size);
+  return 0;
 }
 
 char *

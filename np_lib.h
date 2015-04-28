@@ -156,4 +156,7 @@ Sock_ntop(const struct sockaddr *sa, socklen_t salen);
 
 void
 sctp_list_addresses (struct sockaddr_storage* addrs, int n);
+
+int
+heartbeat_action (int sock_fd, struct sockaddr* sa, socklen_t salen, int interval);
 #endif
