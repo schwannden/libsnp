@@ -1,6 +1,7 @@
 #include "np_header.h"
 #include "np_lib.h"
 #include "error_functions.h"
+#include "log.h"
 
 int
 Sctp_opt_info(int sockfd, sctp_assoc_t assoc_id, int opt, void* arg, socklen_t *size)
@@ -145,16 +146,16 @@ void print_notification (int sock_fd, char* notify_buf)
               str = "UNKNOWN";
               break;
           }
-        printf ("#  SCTP notification: SCTP_ASSOC_CHANGE: %s, assoc=0x%x\n",
+        log_info ("#  SCTP notification: SCTP_ASSOC_CHANGE: %s, assoc=0x%x",
                  str, (uint32_t) sac->sac_assoc_id);
         if (address_number == 1) //only print address on SCTP_COMM_UP and SCTP_RESTART
           {
             address_number = sctp_getpaddrs (sock_fd, sac->sac_assoc_id, (SA**)&address_list);
-            printf ("There are %d remote address:\n", address_number);
+            log_info ("There are %d remote address:", address_number);
             sctp_list_addresses (address_list, address_number);
             sctp_freepaddrs ((SA*) address_list);
             address_number = sctp_getladdrs (sock_fd, sac->sac_assoc_id, (SA**)&address_list);
-            printf ("There are %d local address:\n", address_number);
+            log_info ("There are %d local address:", address_number);
             sctp_list_addresses (address_list, address_number);
             sctp_freeladdrs ((SA*) address_list);
           }
@@ -185,38 +186,38 @@ void print_notification (int sock_fd, char* notify_buf)
               str = "UNKNOWN";
               break;
           }
-        printf ("#  SCTP notification: SCTP_PEER_ADDR_CHANGE: %s, addr=%s, assoc=0x%x\n",
+        log_info ("#  SCTP notification: SCTP_PEER_ADDR_CHANGE: %s, addr=%s, assoc=0x%x",
                  str, Sock_ntop ( (SA*) &spc->spc_aaddr, sizeof (spc->spc_aaddr) ),
                  (uint32_t) spc->spc_assoc_id);
         break;
       case SCTP_REMOTE_ERROR:
         sre = &notification->sn_remote_error;
-        printf ("#  SCTP notification: SCTP_REMOTE_ERROR: asoc=0x%x, error=%d\n",
+        log_info ("#  SCTP notification: SCTP_REMOTE_ERROR: asoc=0x%x, error=%d",
                  (uint32_t) sre->sre_assoc_id, sre->sre_error);
         break;
       case SCTP_SEND_FAILED:
         ssf = &notification->sn_send_failed;
-        printf ("#  SCTP notification: SCTP_SEND_FAILED: asoc=0x%x, error=%d\n",
+        log_info ("#  SCTP notification: SCTP_SEND_FAILED: asoc=0x%x, error=%d",
                  (uint32_t) ssf->ssf_assoc_id, ssf->ssf_error);
         break;
       case SCTP_ADAPTATION_INDICATION:
         sae = &notification->sn_adaptation_event;
-        printf ("#  SCTP notification: SCTP_ADAPTATION_INDICATION: 0x%x\n", (u_int) sae->sai_adaptation_ind);
+        log_info ("#  SCTP notification: SCTP_ADAPTATION_INDICATION: 0x%x", (u_int) sae->sai_adaptation_ind);
         break;
       case SCTP_PARTIAL_DELIVERY_EVENT:
         pdapi = &notification->sn_pdapi_event;
         if (pdapi->pdapi_indication == SCTP_PARTIAL_DELIVERY_ABORTED)
-          printf ("#  SCTP notification: SCTP_PARTIAL_DELIVERY_ABORTED\n");
+          log_info ("#  SCTP notification: SCTP_PARTIAL_DELIVERY_ABORTED");
         else
-          printf ("#  SCTP notification: SUnknown SCTP_PARTIAL_DELIVERY_EVENT 0x%x\n",
+          log_info ("#  SCTP notification: SUnknown SCTP_PARTIAL_DELIVERY_EVENT 0x%x",
                   pdapi->pdapi_indication);
         break;
       case SCTP_SHUTDOWN_EVENT:
         sse = &notification->sn_shutdown_event;
-        printf ("#  SCTP notification: SCTP_SHUTDOWN_EVENT: assoc_id=0x%x\n", (uint32_t)sse->sse_assoc_id);
+        log_info ("#  SCTP notification: SCTP_SHUTDOWN_EVENT: assoc_id=0x%x", (uint32_t)sse->sse_assoc_id);
         break;
       default:
-        nonfatal_user_ret ("#  SCTP notification: unknown notification type 0x%x\n", notification->sn_header.sn_type);
+        nonfatal_user_ret ("#  SCTP notification: unknown notification type 0x%x", notification->sn_header.sn_type);
     }
 }
 
@@ -232,7 +233,7 @@ sctp_list_addresses (struct sockaddr_storage* addrs, int n)
   current = addrs;
   for (i = 0 ; i < n ; i++)
     {
-      printf ("    %d. %s\n", i+1, Sock_ntop ((SA*)current, socklen));
+      log_info ("    %d. %s", i+1, Sock_ntop ((SA*)current, socklen));
 #ifdef HAVE_SOCKADDR_SA_LEN
       socklen = current->ss_len;
 #else
@@ -249,7 +250,8 @@ sctp_list_addresses (struct sockaddr_storage* addrs, int n)
     }
 }
 
-int heartbeat_action (int sock_fd, struct sockaddr* sa, socklen_t salen, int interval)
+int
+heartbeat_action (int sock_fd, struct sockaddr* sa, socklen_t salen, int interval)
 {
   struct sctp_paddrparams paddrparams;
   int    size = sizeof(paddrparams);
@@ -337,4 +339,38 @@ Sock_ntop(const struct sockaddr *sa, socklen_t salen)
   if ( (ptr = sock_ntop(sa, salen)) == NULL)
     err_sys("sock_ntop error");  /* inet_ntop() sets errno */
   return(ptr);
+}
+
+int
+Sctp_bindx(int sock_fd,struct sockaddr_storage *at,int num,int op)
+{
+  int ret;
+  ret = sctp_bindx (sock_fd, (struct sockaddr*) at, num, op);
+  if (ret < 0)
+    err_sys("sctp_bindx error");
+  return ret;
+}
+
+int
+sctp_bind_arg_list(int sock_fd, char **argv, int argc)
+{
+  struct addrinfo *addr;
+  char *bindbuf, *p, portbuf[10];
+  int addrcnt=0;
+  int i;
+
+  bindbuf = (char *) calloc (argc, sizeof (struct sockaddr_storage));
+  p = bindbuf;
+  sprintf(portbuf, "%d", SERV_PORT);
+  for( i=0; i<argc; i++ )
+    {
+      addr = Host_serv(argv[i], portbuf, AF_UNSPEC, SOCK_SEQPACKET);
+      memcpy(p, addr->ai_addr, addr->ai_addrlen);
+      freeaddrinfo(addr);
+      addrcnt++;
+      p += addr->ai_addrlen;
+    }
+  Sctp_bindx ( sock_fd, (struct sockaddr_storage*) bindbuf, addrcnt, SCTP_BINDX_ADD_ADDR);
+  free (bindbuf);
+  return 0;
 }

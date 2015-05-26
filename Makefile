@@ -2,7 +2,14 @@ ifeq ($(PREFIX),)
 PREFIX = /usr
 endif
 
-CFLAGS=-g -fpic
+CFLAGS=-g -fpic 
+ifeq ($(LOG_LEVEL),)
+  CFLAGS += -D LOG_LEVEL=3
+  $(info setting log level to 3)
+else
+  CFLAGS += -D LOG_LEVEL=$(LOG_LEVEL)
+  $(info setting log level to $(LOG_LEVEL))
+endif
 
 SRCS = $(wildcard *.c)
 ifeq ($(SRCS),)                  #work around wildcard function bug in GNU Make 3.77
