@@ -80,11 +80,11 @@ pdapi_recvmsg (int sock_fd, int* readlen, SA* from, int* fromlen,
       sctp_pdapi_readbuf = (uint8_t*) Malloc (SCTP_PDAPI_INCR_SIZE);
       sctp_pdapi_readbuf_size = SCTP_PDAPI_INCR_SIZE;
     }
+  bytes_read = -1;
+  while (bytes_read < 0)
+    bytes_read = Sctp_recvmsg (sock_fd, sctp_pdapi_readbuf, sctp_pdapi_readbuf_size, 
+                               from, fromlen, sri, msg_flags);
 
-  bytes_read = Sctp_recvmsg (sock_fd, sctp_pdapi_readbuf, sctp_pdapi_readbuf_size, 
-                             from, fromlen, sri, msg_flags);
-  if (bytes_read < 0 && errno != EWOULDBLOCK)
-    log_error ("pdapi_recvmsg error");
   while ((*msg_flags & MSG_EOR) == 0)
     {
       bytes_left = sctp_pdapi_readbuf_size - bytes_read;
