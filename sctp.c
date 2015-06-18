@@ -60,7 +60,7 @@ Sctp_recvmsg (int sock_fd, void *msg, size_t len, SA* from,
 {
   int ret;
   ret = sctp_recvmsg (sock_fd, msg, len, from, fromlen, sinfo, msg_flags);
-  if (ret < 0){
+  if (ret < 0 && errno != EWOULDBLOCK){
     fatal_sys_exit ("sctp_recvmsg error");
   }
   return(ret);
