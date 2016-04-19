@@ -21,7 +21,7 @@ OBJS = $(SRCS:.c=.o)
 all: libsnp.so
 
 libsnp.so: $(OBJS)
-	$(CC) $(CFLAGS) -shared -o $@ $(OBJS) -lsctp
+	$(CC) $(CFLAGS) -shared -o $@ $(OBJS)
 
 install:
 	mkdir -p $(PREFIX)/include/libsnp $(PREFIX)/lib

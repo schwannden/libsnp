@@ -53,10 +53,6 @@
 /* signal.h
  *for signal, sigaction
  */
-#include<netinet/sctp.h>
-/*sctp.h
- * for sctp stuff of course
- */
 #include<netdb.h>
 /*netdb.h
  * for struct addrinfo

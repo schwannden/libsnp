@@ -126,24 +126,6 @@ Shutdown(int fd, int how);
 ssize_t
 Read( int fd, void* buf, size_t n );
 
-int
-Scpt_opt_info(int sockfd, sctp_assoc_t assoc_id, int opt, void* arg, socklen_t *size);
-
-int 
-sctp_get_no_strms(int sock_fd,struct sockaddr *to, socklen_t tolen);
-
-sctp_assoc_t
-sctp_address_to_associd(int sock_fd, struct sockaddr *sa, socklen_t salen);
-
-int
-Sctp_sendmsg (int sock_fd, void* data, size_t len, SA* to, 
-              socklen_t tolen, uint32_t ppid, uint32_t flags, 
-              uint16_t stream_no, uint32_t timetolive, uint32_t context);
-
-uint8_t *
-pdapi_recvmsg (int sock_fd, int* readlen, SA* from, int* fromlen, 
-               struct sctp_sndrcvinfo* sri, int* msgflags);
-
 void print_notification (int sock_fd, char* notify_buf);
 
 //returns a representation string for sa. The string is staticalled 
@@ -154,9 +136,6 @@ sock_ntop(const struct sockaddr *sa, socklen_t salen);
 char *
 Sock_ntop(const struct sockaddr *sa, socklen_t salen);
 
-void
-sctp_list_addresses (struct sockaddr_storage* addrs, int n);
-
 int
 heartbeat_action (int sock_fd, struct sockaddr* sa, socklen_t salen, int interval);
 
@@ -165,8 +144,5 @@ host_serv(const char *host, const char *serv, int family, int socktype);
 
 struct addrinfo *
 Host_serv(const char *host, const char *serv, int family, int socktype);
-
-int
-sctp_bind_arg_list(int sock_fd, char **argv, int argc);
 
 #endif
