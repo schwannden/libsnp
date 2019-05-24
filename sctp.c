@@ -258,6 +258,7 @@ heartbeat_action (int sock_fd, struct sockaddr* sa, socklen_t salen, int interva
   struct sctp_paddrparams paddrparams;
   int    size = sizeof(paddrparams);
   bzero (&paddrparams, size);
+  paddrparams.spp_hbinterval = interval;
   memcpy ((void*) &paddrparams.spp_address, sa, salen);
   Setsockopt (sock_fd, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS, &paddrparams, size);
   return 0;
